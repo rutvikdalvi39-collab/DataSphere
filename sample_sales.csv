@@ -1,0 +1,12 @@
+
+Order_ID,Product,Category,Region,Sales,Profit,Quantity
+1001,Laptop,Electronics,West,55000,8500,2
+1002,Mobile,Electronics,East,25000,4000,3
+1003,Chair,Furniture,North,8000,1200,4
+1004,Table,Furniture,South,15000,2500,2
+1005,Headphones,Electronics,West,3000,600,5
+1006,Notebook,Stationery,East,500,100,10
+1007,Pen,Stationery,North,200,50,20
+1008,Monitor,Electronics,South,12000,1800,2
+1009,Desk,Furniture,West,10000,1500,1
+1010,Keyboard,Electronics,East,1500,300,3
