@@ -604,7 +604,48 @@ if uploaded_file is not None:
             )
 
     else:
-        st.success("No missing values found in this dataset!")    
+        st.success("No missing values found in this dataset!") 
+        # ==========================================
+    # 15. DUPLICATE DATA CLEANING
+    # ==========================================
+
+    st.subheader("Duplicate Data Handling")
+
+    duplicate_count = int(df.duplicated().sum())
+
+    st.metric("Duplicate Rows Found", duplicate_count)
+
+    if duplicate_count > 0:
+
+        if st.button("Remove Duplicate Rows"):
+
+            duplicate_cleaned_df = df.drop_duplicates()
+
+            st.success(
+                f"Successfully removed {duplicate_count} duplicate rows!"
+            )
+
+            st.subheader("Dataset After Duplicate Removal")
+
+            st.dataframe(
+                duplicate_cleaned_df,
+                width="stretch"
+            )
+
+            duplicate_csv = duplicate_cleaned_df.to_csv(
+                index=False
+            ).encode("utf-8")
+
+            st.download_button(
+                label="Download Duplicate-Free CSV",
+                data=duplicate_csv,
+                file_name="duplicate_free_dataset.csv",
+                mime="text/csv"
+            )
+
+    else:
+
+        st.success("No duplicate rows found in this dataset!")       
 
 else:
 
