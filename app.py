@@ -758,6 +758,129 @@ if uploaded_file is not None:
             st.error(
                 f"Conversion failed: {error}"
             )
+            # ==========================================
+    # 17. OUTLIER DETECTION
+    # ==========================================
+
+    st.header("15. Outlier Detection")
+
+    st.write(
+        "Identify unusual values in numerical columns "
+        "using the IQR method."
+    )
+
+    if numeric_columns:
+
+        outlier_results = []
+
+        for column in numeric_columns:
+
+            Q1 = df[column].quantile(0.25)
+            Q3 = df[column].quantile(0.75)
+
+            IQR = Q3 - Q1
+
+            lower_limit = Q1 - (1.5 * IQR)
+            upper_limit = Q3 + (1.5 * IQR)
+
+            outlier_count = int(
+                (
+                    (df[column] < lower_limit) |
+                    (df[column] > upper_limit)
+                ).sum()
+            )
+
+            outlier_results.append({
+                "Column": column,
+                "Lower Limit": lower_limit,
+                "Upper Limit": upper_limit,
+                "Outliers Found": outlier_count
+            })
+
+        outlier_df = pd.DataFrame(outlier_results)
+
+        # Outlier Summary
+
+        st.subheader("Outlier Analysis Summary")
+
+        st.dataframe(
+            outlier_df,
+            width="stretch"
+        )
+
+        # Outlier Visualization
+
+        st.subheader("Outlier Visualization")
+
+        selected_outlier_column = st.selectbox(
+            "Select column for outlier visualization",
+            numeric_columns,
+            key="outlier_visualization"
+        )
+
+        fig = px.box(
+            df,
+            y=selected_outlier_column,
+            title=f"Outlier Distribution: {selected_outlier_column}",
+            points="outliers"
+        )
+
+        st.plotly_chart(
+            fig,
+            width="stretch"
+        )
+                # Outlier Removal
+
+        st.subheader("Outlier Removal")
+
+        st.write(
+            "Remove rows containing outliers from the selected column."
+        )
+
+        if st.button("Remove Outliers"):
+
+            Q1 = df[selected_outlier_column].quantile(0.25)
+            Q3 = df[selected_outlier_column].quantile(0.75)
+
+            IQR = Q3 - Q1
+
+            lower_limit = Q1 - (1.5 * IQR)
+            upper_limit = Q3 + (1.5 * IQR)
+
+            outlier_cleaned_df = df[
+                (df[selected_outlier_column] >= lower_limit) &
+                (df[selected_outlier_column] <= upper_limit)
+            ].copy()
+
+            removed_count = len(df) - len(outlier_cleaned_df)
+
+            st.success(
+                f"Successfully removed {removed_count} outlier rows!"
+            )
+
+            st.subheader("Dataset After Outlier Removal")
+
+            st.dataframe(
+                outlier_cleaned_df,
+                width="stretch"
+            )
+
+            outlier_csv = outlier_cleaned_df.to_csv(
+                index=False
+            ).encode("utf-8")
+
+            st.download_button(
+                label="Download Outlier-Free CSV",
+                data=outlier_csv,
+                file_name="outlier_free_dataset.csv",
+                mime="text/csv"
+            )
+
+    else:
+
+        st.warning(
+            "No numerical columns available for outlier detection."
+        )
 else:
 
     st.info(
