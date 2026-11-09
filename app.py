@@ -645,8 +645,119 @@ if uploaded_file is not None:
 
     else:
 
-        st.success("No duplicate rows found in this dataset!")       
+        st.success("No duplicate rows found in this dataset!")  
+        # ==========================================
+    # 16. DATA TYPE CORRECTION
+    # ==========================================
 
+    st.header("14. Data Type Correction")
+
+    st.write("Inspect and convert column data types.")
+
+    # Display current data types
+
+    dtype_info = pd.DataFrame({
+        "Column": df.columns,
+        "Current Data Type": df.dtypes.astype(str).values
+    })
+
+    st.dataframe(
+        dtype_info,
+        width="stretch"
+    )
+
+    # Select column and target data type
+
+    st.markdown("### Convert Column Data Type")
+
+    selected_column = st.selectbox(
+        "Select a column",
+        df.columns,
+        key="dtype_column"
+    )
+
+    target_dtype = st.selectbox(
+        "Select the new data type",
+        ["Integer", "Decimal", "Text", "Date"],
+        key="target_dtype"
+    )
+
+    # Convert selected column
+
+    if st.button("Convert Data Type"):
+
+        converted_df = df.copy()
+
+        try:
+
+            if target_dtype == "Integer":
+
+                converted_df[selected_column] = (
+                    pd.to_numeric(
+                        converted_df[selected_column],
+                        errors="coerce"
+                    ).astype("Int64")
+                )
+
+            elif target_dtype == "Decimal":
+
+               converted_df[selected_column] = pd.to_numeric(
+                converted_df[selected_column],
+                errors="coerce"
+               ).astype("float64")
+
+            elif target_dtype == "Text":
+
+                converted_df[selected_column] = (
+                    converted_df[selected_column].astype("string")
+                )
+
+            elif target_dtype == "Date":
+
+                converted_df[selected_column] = pd.to_datetime(
+                    converted_df[selected_column],
+                    errors="coerce"
+                )
+
+            # Display conversion result
+
+            st.success("Data type converted successfully!")
+
+            st.subheader("Converted Dataset")
+
+            st.dataframe(
+                converted_df,
+                width="stretch"
+            )
+
+            st.write(
+                "Selected Column:",
+                selected_column
+            )
+
+            st.write(
+                "New Data Type:",
+                str(converted_df[selected_column].dtype)
+            )
+
+            # Download converted dataset
+
+            converted_csv = converted_df.to_csv(
+                index=False
+            ).encode("utf-8")
+
+            st.download_button(
+                label="Download Converted CSV",
+                data=converted_csv,
+                file_name="converted_dataset.csv",
+                mime="text/csv"
+            )
+
+        except Exception as error:
+
+            st.error(
+                f"Conversion failed: {error}"
+            )
 else:
 
     st.info(
