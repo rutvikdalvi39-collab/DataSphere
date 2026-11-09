@@ -881,6 +881,141 @@ if uploaded_file is not None:
         st.warning(
             "No numerical columns available for outlier detection."
         )
+        # ==========================================
+    # 18. INTERACTIVE DATA VISUALIZATION DASHBOARD
+    # ==========================================
+
+    st.header("16. Interactive Data Visualization Dashboard")
+
+    st.write(
+        "Create customized interactive visualizations "
+        "from your uploaded dataset."
+    )
+
+    chart_type = st.selectbox(
+        "Select Visualization Type",
+        [
+            "Bar Chart",
+            "Line Chart",
+            "Pie Chart",
+            "Histogram",
+            "Scatter Plot"
+        ],
+        key="dashboard_chart_type"
+    )    
+
+        # Select columns for visualization
+
+    st.subheader("Chart Configuration")
+
+    if chart_type in ["Bar Chart", "Line Chart"]:
+
+        x_column = st.selectbox(
+            "Select X-axis column",
+            df.columns,
+            key="dashboard_x"
+        )
+
+        y_column = st.selectbox(
+            "Select Y-axis column",
+            numeric_columns,
+            key="dashboard_y"
+        )
+
+    elif chart_type == "Pie Chart":
+
+        pie_column = st.selectbox(
+            "Select category column",
+            categorical_columns,
+            key="dashboard_pie"
+        )
+
+    elif chart_type == "Histogram":
+
+        histogram_column = st.selectbox(
+            "Select numerical column",
+            numeric_columns,
+            key="dashboard_histogram"
+        )
+
+    elif chart_type == "Scatter Plot":
+
+        scatter_x = st.selectbox(
+            "Select X-axis",
+            numeric_columns,
+            key="dashboard_scatter_x"
+        )
+
+        scatter_y = st.selectbox(
+            "Select Y-axis",
+            numeric_columns,
+            index=min(1, len(numeric_columns) - 1),
+            key="dashboard_scatter_y"
+        )
+
+        # Generate Selected Chart
+
+    st.subheader("Visualization Result")
+
+    custom_title = st.text_input(
+        "Enter Custom Chart Title",
+        value="My DataSphere Visualization",
+        key="custom_chart_title"
+    )
+
+    if chart_type == "Bar Chart":
+
+        fig = px.bar(
+            df,
+            x=x_column,
+            y=y_column,
+            title=f"{y_column} by {x_column}"
+        )
+
+    elif chart_type == "Line Chart":
+
+        fig = px.line(
+            df,
+            x=x_column,
+            y=y_column,
+            title=f"{y_column} Trend by {x_column}",
+            markers=True
+        )
+
+    elif chart_type == "Pie Chart":
+
+        pie_data = df[pie_column].value_counts().reset_index()
+        pie_data.columns = ["Category", "Count"]
+
+        fig = px.pie(
+            pie_data,
+            names="Category",
+            values="Count",
+            title=f"Distribution of {pie_column}"
+        )
+
+    elif chart_type == "Histogram":
+
+        fig = px.histogram(
+            df,
+            x=histogram_column,
+            title=f"Distribution of {histogram_column}"
+        )
+
+    elif chart_type == "Scatter Plot":
+
+        fig = px.scatter(
+            df,
+            x=scatter_x,
+            y=scatter_y,
+            title=f"{scatter_y} vs {scatter_x}"
+        )
+
+    fig.update_layout(
+        title=custom_title
+    )
+
+    st.plotly_chart(fig, width="stretch")
 else:
 
     st.info(
