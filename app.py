@@ -14,18 +14,134 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+# ==========================================
+# DATASPHERE ADVANCED UI
+# ==========================================
 
-st.title("📊 DataSphere")
-st.subheader("Multi-Domain Data Analytics Platform")
+st.markdown("""
+<style>
 
-st.write(
-    "Explore datasets, analyze information, "
-    "and discover meaningful insights."
-)
+/* Main Application */
 
-st.sidebar.title("DataSphere Menu")
-st.sidebar.info("Your Data Science workspace")
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #0B1120 0%,
+        #111827 50%,
+        #0F172A 100%
+    );
+    color: #F8FAFC;
+}
 
+/* Main Content */
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1500px;
+}
+
+/* Sidebar */
+
+[data-testid="stSidebar"] {
+    background: #111827;
+    border-right: 1px solid #263449;
+}
+
+/* Headings */
+
+h1, h2, h3 {
+    color: #F8FAFC !important;
+    font-weight: 700 !important;
+}
+
+/* Paragraphs */
+
+p, label {
+    color: #CBD5E1;
+}
+
+/* Metric Cards */
+
+[data-testid="stMetric"] {
+    background: #172235;
+    border: 1px solid #263449;
+    padding: 20px;
+    border-radius: 14px;
+}
+
+/* Buttons */
+
+.stButton > button {
+    background: #0891B2;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 0.55rem 1.2rem;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.stButton > button:hover {
+    background: #06B6D4;
+    color: white;
+    border: none;
+}
+
+/* Input Fields */
+
+.stTextInput input,
+.stNumberInput input {
+    background: #172235;
+    color: white;
+    border: 1px solid #334155;
+    border-radius: 8px;
+}
+
+/* DataFrames */
+
+[data-testid="stDataFrame"] {
+    border: 1px solid #263449;
+    border-radius: 12px;
+}
+
+/* Section Dividers */
+
+hr {
+    border-color: #263449;
+}
+
+/* Remove Top Header Background */
+
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("""
+<div style="padding: 15px 5px 25px 5px;">
+
+<h2 style="color: #67E8F9; font-size: 25px;">
+◈ DataSphere
+</h2>
+
+<p style="color: #94A3B8; font-size: 12px; letter-spacing: 2px;">
+ANALYTICS WORKSPACE
+</p>
+
+<hr style="border-color: #263449;">
+
+<p style="color: #CBD5E1; font-size: 14px;">
+Your intelligent data analysis environment.
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("### WORKSPACE")
+st.sidebar.caption("Explore · Analyze · Visualize")
 
 # ==========================================
 # 2. DATASET UPLOAD
@@ -55,12 +171,34 @@ if uploaded_file is not None:
         st.stop()
 
 
-    # ==========================================
+        # ==========================================
     # 3. DATASET PREVIEW
     # ==========================================
 
     st.header("2. Dataset Preview")
-    st.dataframe(df.head(10), width="stretch")
+
+    st.markdown(
+        "Preview the first 10 records from your uploaded dataset."
+    )
+
+    preview_col1, preview_col2 = st.columns([3, 1])
+
+    with preview_col1:
+        st.markdown("### Data Explorer")
+
+    with preview_col2:
+        st.caption(f"Showing {min(len(df), 10)} of {len(df):,} rows")
+
+    with st.container(border=True):
+        st.dataframe(
+            df.head(10),
+            width="stretch",
+            height=350
+        )
+
+    st.caption(
+        f"Dataset contains {df.shape[0]:,} rows and {df.shape[1]:,} columns."
+    )
 
 
     # ==========================================
@@ -69,42 +207,79 @@ if uploaded_file is not None:
 
     st.header("3. Dataset Overview")
 
+    st.markdown("### Dataset Performance Metrics")
+
     col1, col2, col3, col4 = st.columns(4)
 
-    with col1:
-        st.metric("Total Rows", df.shape[0])
+    metrics = [
+        ("📊", "Total Rows", f"{df.shape[0]:,}", "#22D3EE"),
+        ("📁", "Total Columns", f"{df.shape[1]:,}", "#A78BFA"),
+        ("⚠️", "Missing Values", f"{int(df.isna().sum().sum()):,}", "#FBBF24"),
+        ("📋", "Duplicate Rows", f"{int(df.duplicated().sum()):,}", "#34D399")
+    ]
 
-    with col2:
-        st.metric("Total Columns", df.shape[1])
+    for col, metric in zip([col1, col2, col3, col4], metrics):
 
-    with col3:
-        st.metric("Missing Values", int(df.isna().sum().sum()))
+        with col:
 
-    with col4:
-        st.metric("Duplicate Rows", int(df.duplicated().sum()))
+            card_html = (
+                f'<div style="background:linear-gradient(145deg,#172235,#1E293B);'
+                f'border:1px solid #334155;border-radius:15px;padding:22px;min-height:135px;">'
+                f'<div style="font-size:25px;">{metric[0]}</div>'
+                f'<div style="color:#94A3B8;font-size:13px;margin-top:12px;">{metric[1]}</div>'
+                f'<div style="color:{metric[3]};font-size:28px;font-weight:700;margin-top:5px;">{metric[2]}</div>'
+                f'</div>'
+            )
+
+            st.markdown(card_html, unsafe_allow_html=True)
 
 
-    # ==========================================
+       # ==========================================
     # 5. COLUMN INFORMATION
     # ==========================================
 
     st.header("4. Column Information")
 
+    st.markdown(
+        "Explore data types, completeness, and uniqueness for every column."
+    )
+
     column_info = pd.DataFrame({
-        "Column": df.columns,
-        "Data Type": df.dtypes.astype(str).values,
-        "Non-Missing Values": df.notna().sum().values,
-        "Unique Values": df.nunique().values
+        "Column": df.columns.tolist(),
+        "Data Type": df.dtypes.astype(str).tolist(),
+        "Non-Missing Values": df.notna().sum().tolist(),
+        "Unique Values": df.nunique().tolist()
     })
 
-    st.dataframe(column_info, width="stretch")
+    st.markdown("### Column Profiling")
 
+    info_col1, info_col2, info_col3 = st.columns(3)
 
-    # ==========================================
+    with info_col1:
+        st.metric("Total Columns", df.shape[1])
+
+    with info_col2:
+        st.metric("Numeric Columns", len(df.select_dtypes(include="number").columns))
+
+    with info_col3:
+        st.metric("Categorical Columns", len(df.select_dtypes(include=["object", "category", "string"]).columns))
+
+    with st.container(border=True):
+        st.dataframe(
+            column_info,
+            width="stretch",
+            height=350,
+            hide_index=True
+        )
+        # ==========================================
     # 6. MISSING VALUE ANALYSIS
     # ==========================================
 
     st.header("5. Missing Value Analysis")
+
+    st.markdown(
+        "Monitor dataset completeness and identify missing information."
+    )
 
     missing_data = pd.DataFrame({
         "Column": df.columns,
@@ -114,64 +289,216 @@ if uploaded_file is not None:
         ).round(2)
     })
 
-    st.dataframe(missing_data, width="stretch")
+    total_missing = int(df.isna().sum().sum())
+    total_cells = df.shape[0] * df.shape[1]
 
+    completeness = (
+        ((total_cells - total_missing) / total_cells) * 100
+        if total_cells > 0 else 100
+    )
 
-    # ==========================================
+    missing_col1, missing_col2, missing_col3 = st.columns(3)
+
+    with missing_col1:
+        st.metric("Total Missing Values", f"{total_missing:,}")
+
+    with missing_col2:
+        st.metric("Data Completeness", f"{completeness:.2f}%")
+
+    with missing_col3:
+        affected_columns = int((df.isna().sum() > 0).sum())
+        st.metric("Affected Columns", affected_columns)
+
+    st.markdown("### Missing Value Details")
+
+    with st.container(border=True):
+        st.dataframe(
+            missing_data,
+            width="stretch",
+            hide_index=True
+        )
+
+    if total_missing == 0:
+        st.success("Excellent! Your dataset contains no missing values.")
+    else:
+        st.warning(
+            f"Your dataset contains {total_missing:,} missing values. "
+            "Consider cleaning these values before analysis."
+        )
+
+        # ==========================================
     # 7. DUPLICATE ANALYSIS
     # ==========================================
 
     st.header("6. Duplicate Analysis")
 
+    st.markdown(
+        "Identify repeated records and monitor dataset uniqueness."
+    )
+
     duplicate_count = int(df.duplicated().sum())
+    total_rows = len(df)
 
-    if duplicate_count > 0:
-        st.warning(f"Found {duplicate_count} duplicate rows.")
-    else:
-        st.success("No duplicate rows found.")
+    duplicate_percentage = (
+        (duplicate_count / total_rows) * 100
+        if total_rows > 0 else 0
+    )
+
+    unique_rows = total_rows - duplicate_count
+
+    duplicate_col1, duplicate_col2, duplicate_col3 = st.columns(3)
+
+    with duplicate_col1:
+        st.metric("Duplicate Rows", f"{duplicate_count:,}")
+
+    with duplicate_col2:
+        st.metric("Unique Rows", f"{unique_rows:,}")
+
+    with duplicate_col3:
+        st.metric("Duplicate Percentage", f"{duplicate_percentage:.2f}%")
+
+    st.markdown("### Data Uniqueness Status")
+
+    with st.container(border=True):
+
+        if duplicate_count > 0:
+            st.warning(
+                f"Found {duplicate_count:,} duplicate rows in your dataset."
+            )
+            st.write(
+                "Consider reviewing duplicate records before performing analysis."
+            )
+        else:
+            st.success("Your dataset contains no duplicate rows.")
+            st.write(
+                "All records are unique according to the full-row comparison."
+            )
 
 
-    # ==========================================
+        # ==========================================
     # 8. STATISTICAL SUMMARY
     # ==========================================
 
     st.header("7. Statistical Summary")
 
-    st.dataframe(
-        df.describe(include="all"),
-        width="stretch"
+    st.markdown(
+        "Understand the distribution, central tendency, and spread of your dataset."
     )
 
+    statistical_summary = df.describe(include="all").T.reset_index()
+    statistical_summary.rename(
+        columns={"index": "Column"},
+        inplace=True
+    )
 
-    # ==========================================
+    numeric_columns = df.select_dtypes(include="number").columns
+
+    stat_col1, stat_col2, stat_col3 = st.columns(3)
+
+    with stat_col1:
+        st.metric("Total Features", df.shape[1])
+
+    with stat_col2:
+        st.metric("Numeric Features", len(numeric_columns))
+
+    with stat_col3:
+        st.metric(
+            "Categorical Features",
+            df.shape[1] - len(numeric_columns)
+        )
+
+    st.markdown("### Descriptive Statistics")
+
+    with st.container(border=True):
+        st.dataframe(
+            statistical_summary,
+            width="stretch",
+            hide_index=True
+        )
+
+
+        # ==========================================
     # 9. UNIQUE VALUE ANALYSIS
     # ==========================================
 
     st.header("8. Unique Values")
 
+    st.markdown(
+        "Explore distinct values and understand how frequently they appear."
+    )
+
     selected_column = st.selectbox(
         "Select a column",
-        df.columns
+        df.columns,
+        key="unique_values_column"
     )
 
-    st.write(
-        df[selected_column].value_counts().head(20)
+    value_counts = df[selected_column].value_counts().head(20)
+
+    unique_count = int(df[selected_column].nunique())
+    most_frequent = (
+        str(value_counts.index[0])
+        if not value_counts.empty else "N/A"
     )
 
+    frequency_col1, frequency_col2, frequency_col3 = st.columns(3)
 
-    # ==========================================
+    with frequency_col1:
+        st.metric("Unique Values", f"{unique_count:,}")
+
+    with frequency_col2:
+        st.metric("Displayed Values", len(value_counts))
+
+    with frequency_col3:
+        st.metric("Most Frequent Value", most_frequent)
+
+    st.markdown("### Value Frequency Distribution")
+
+    frequency_data = value_counts.rename_axis(
+        "Value"
+    ).reset_index(name="Frequency")
+
+    with st.container(border=True):
+        st.dataframe(
+            frequency_data,
+            width="stretch",
+            hide_index=True
+        )
+        # ==========================================
     # 10. EXPLORATORY DATA ANALYSIS (EDA)
     # ==========================================
 
     st.header("9. Exploratory Data Analysis")
+
+    st.markdown(
+        "Discover patterns, distributions, relationships, and correlations in your data."
+    )
 
     numeric_columns = df.select_dtypes(
         include=np.number
     ).columns.tolist()
 
     categorical_columns = df.select_dtypes(
-        include=["object", "category"]
+        include=["object", "category", "string"]
     ).columns.tolist()
+
+    # EDA Overview
+
+    eda_col1, eda_col2, eda_col3 = st.columns(3)
+
+    with eda_col1:
+        st.metric("Numerical Features", len(numeric_columns))
+
+    with eda_col2:
+        st.metric("Categorical Features", len(categorical_columns))
+
+    with eda_col3:
+        st.metric(
+            "Total Features Analyzed",
+            len(numeric_columns) + len(categorical_columns)
+        )
+
+    st.divider()
 
     # Numerical Distribution
 
@@ -188,10 +515,19 @@ if uploaded_file is not None:
         fig = px.histogram(
             df,
             x=selected_numeric,
-            title=f"Distribution of {selected_numeric}"
+            title=f"Distribution of {selected_numeric}",
+            color_discrete_sequence=["#22D3EE"]
         )
 
-        st.plotly_chart(fig, width="stretch")
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02
+        )
+
+        with st.container(border=True):
+            st.plotly_chart(fig, width="stretch")
 
     # Categorical Distribution
 
@@ -217,10 +553,21 @@ if uploaded_file is not None:
             category_counts,
             x="Category",
             y="Count",
-            title=f"Distribution of {selected_category}"
+            title=f"Distribution of {selected_category}",
+            color="Category",
+            color_discrete_sequence=px.colors.qualitative.Bold
         )
 
-        st.plotly_chart(fig, width="stretch")
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02,
+            showlegend=False
+        )
+
+        with st.container(border=True):
+            st.plotly_chart(fig, width="stretch")
 
     # Relationship Analysis
 
@@ -249,10 +596,19 @@ if uploaded_file is not None:
             df,
             x=x_column,
             y=y_column,
-            title=f"{x_column} vs {y_column}"
+            title=f"{x_column} vs {y_column}",
+            color_discrete_sequence=["#A78BFA"]
         )
 
-        st.plotly_chart(fig, width="stretch")
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02
+        )
+
+        with st.container(border=True):
+            st.plotly_chart(fig, width="stretch")
 
     # Correlation Heatmap
 
@@ -269,14 +625,23 @@ if uploaded_file is not None:
             title="Numerical Feature Correlation"
         )
 
-        st.plotly_chart(fig, width="stretch")
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02
+        )
 
-
-    # ==========================================
+        with st.container(border=True):
+            st.plotly_chart(fig, width="stretch")
+        # ==========================================
     # 11. BUSINESS INTELLIGENCE
     # ==========================================
 
     st.header("10. Business Intelligence")
+
+    st.markdown(
+        "Analyze business performance, profitability, products, and regional sales."
+    )
 
     required_columns = [
         "Sales",
@@ -287,6 +652,10 @@ if uploaded_file is not None:
     ]
 
     if all(col in df.columns for col in required_columns):
+
+        # Business KPI Cards
+
+        st.markdown("### Business Performance")
 
         col1, col2, col3 = st.columns(3)
 
@@ -308,9 +677,13 @@ if uploaded_file is not None:
                 f"{df['Sales'].mean():,.2f}"
             )
 
+        st.divider()
+
         # Category Analysis
 
-        st.subheader("Sales by Category")
+        st.subheader("Category Performance")
+
+        category_col1, category_col2 = st.columns(2)
 
         category_sales = (
             df.groupby("Category")["Sales"]
@@ -319,63 +692,149 @@ if uploaded_file is not None:
             .sort_values("Sales", ascending=False)
         )
 
-        fig = px.bar(
-            category_sales,
-            x="Category",
-            y="Sales",
-            title="Sales by Category",
-            text_auto=".2s"
-        )
-
-        st.plotly_chart(fig, width="stretch")
-
-        # Profit Analysis
-
-        st.subheader("Profit by Category")
-
         category_profit = (
             df.groupby("Category")["Profit"]
             .sum()
             .reset_index()
+            .sort_values("Profit", ascending=False)
         )
 
-        fig = px.bar(
-            category_profit,
-            x="Category",
-            y="Profit",
-            title="Profit by Category"
-        )
+        with category_col1:
 
-        st.plotly_chart(fig, width="stretch")
+            fig = px.bar(
+                category_sales,
+                x="Category",
+                y="Sales",
+                title="Sales by Category",
+                text_auto=".2s",
+                color="Category",
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                showlegend=False
+            )
+
+            with st.container(border=True):
+                st.plotly_chart(fig, width="stretch")
+
+        with category_col2:
+
+            fig = px.bar(
+                category_profit,
+                x="Category",
+                y="Profit",
+                title="Profit by Category",
+                text_auto=".2s",
+                color="Category",
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                showlegend=False
+            )
+
+            with st.container(border=True):
+                st.plotly_chart(fig, width="stretch")
+
+        st.divider()
 
         # Regional Analysis
 
-        st.subheader("Sales by Region")
+        st.subheader("Regional Sales Intelligence")
 
         region_sales = (
             df.groupby("Region")["Sales"]
             .sum()
             .reset_index()
+            .sort_values("Sales", ascending=False)
         )
 
-        fig = px.pie(
-            region_sales,
-            names="Region",
-            values="Sales",
-            title="Regional Sales Distribution"
-        )
+        region_col1, region_col2 = st.columns(2)
 
-        st.plotly_chart(fig, width="stretch")
+        with region_col1:
 
-        # Top Product
+            fig = px.pie(
+                region_sales,
+                names="Region",
+                values="Sales",
+                title="Regional Sales Distribution",
+                hole=0.45,
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
 
-        top_product = (
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)"
+            )
+
+            with st.container(border=True):
+                st.plotly_chart(fig, width="stretch")
+
+        with region_col2:
+
+            fig = px.bar(
+                region_sales,
+                x="Region",
+                y="Sales",
+                title="Regional Sales Comparison",
+                text_auto=".2s",
+                color="Region",
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                showlegend=False
+            )
+
+            with st.container(border=True):
+                st.plotly_chart(fig, width="stretch")
+
+        st.divider()
+
+        # Top Product Analysis
+
+        st.subheader("Top Product Performance")
+
+        product_sales = (
             df.groupby("Product")["Sales"]
             .sum()
-            .idxmax()
+            .reset_index()
+            .sort_values("Sales", ascending=False)
         )
 
-        st.success(f"Top Selling Product: {top_product}")
+        top_product = product_sales.iloc[0]["Product"]
+        top_product_sales = product_sales.iloc[0]["Sales"]
+
+        top_col1, top_col2 = st.columns(2)
+
+        with top_col1:
+            st.metric(
+                "Top Selling Product",
+                top_product
+            )
+
+        with top_col2:
+            st.metric(
+                "Top Product Sales",
+                f"{top_product_sales:,.2f}"
+            )
+
+        with st.container(border=True):
+            st.dataframe(
+                product_sales,
+                width="stretch",
+                hide_index=True
+            )
 
     else:
 
@@ -385,41 +844,60 @@ if uploaded_file is not None:
         )
 
 
-    # ==========================================
+        # ==========================================
     # 12. MULTI-DOMAIN ANALYTICS
     # ==========================================
 
     st.header("11. Multi-Domain Analytics")
 
-    domain = st.selectbox(
-        "Select your analysis domain",
-        ["Business", "Education", "E-commerce", "Finance"]
+    st.markdown(
+        "Analyze datasets across different domains using customizable calculations and visualizations."
     )
 
+    # Domain Selection
+
+    domain_col1, domain_col2 = st.columns([2, 3])
+
+    with domain_col1:
+        domain = st.selectbox(
+            "Select Analysis Domain",
+            ["Business", "Education", "E-commerce", "Finance"],
+            key="analysis_domain"
+        )
+
     domain_descriptions = {
-        "Business": "Analyze business performance and trends.",
-        "Education": "Analyze student performance and academic data.",
-        "E-commerce": "Analyze product sales and customer behavior.",
-        "Finance": "Analyze financial figures and transactions."
+        "Business": "Analyze business performance, operations, and trends.",
+        "Education": "Explore student performance and academic data.",
+        "E-commerce": "Understand product sales and customer behavior.",
+        "Finance": "Explore financial figures and transaction data."
     }
 
-    st.info(domain_descriptions[domain])
+    with domain_col2:
+        st.info(domain_descriptions[domain])
 
-    st.subheader("Dynamic Data Analysis")
+    st.divider()
+
+    # Dynamic Data Analysis
+
+    st.subheader("Analysis Configuration")
 
     if numeric_columns:
 
-        metric_column = st.selectbox(
-            "Select numerical variable",
-            numeric_columns,
-            key="domain_metric"
-        )
+        config_col1, config_col2 = st.columns(2)
 
-        aggregation = st.selectbox(
-            "Select calculation",
-            ["Sum", "Mean", "Median", "Maximum", "Minimum", "Count"],
-            key="domain_aggregation"
-        )
+        with config_col1:
+            metric_column = st.selectbox(
+                "Select Numerical Variable",
+                numeric_columns,
+                key="domain_metric"
+            )
+
+        with config_col2:
+            aggregation = st.selectbox(
+                "Select Calculation",
+                ["Sum", "Mean", "Median", "Maximum", "Minimum", "Count"],
+                key="domain_aggregation"
+            )
 
         aggregation_functions = {
             "Sum": "sum",
@@ -435,7 +913,7 @@ if uploaded_file is not None:
         if categorical_columns:
 
             category_column = st.selectbox(
-                "Group analysis by",
+                "Group Analysis By",
                 categorical_columns,
                 key="domain_category"
             )
@@ -450,33 +928,84 @@ if uploaded_file is not None:
 
             grouped_data = grouped_data.sort_values(
                 "Value",
-                ascending=False
+                ascending=(aggregation == "Minimum")
             )
+
+            st.divider()
+
+            # Analysis Results
 
             st.subheader("Analysis Results")
 
-            st.dataframe(
-                grouped_data,
-                width="stretch"
-            )
+            result_col1, result_col2, result_col3 = st.columns(3)
+
+            with result_col1:
+                st.metric(
+                    "Groups Analyzed",
+                    len(grouped_data)
+                )
+
+            with result_col2:
+                st.metric(
+                    "Selected Variable",
+                    metric_column
+                )
+
+            with result_col3:
+                st.metric(
+                    "Calculation",
+                    aggregation
+                )
+
+            # Results Table
+
+            st.markdown("### Grouped Data")
+
+            with st.container(border=True):
+                st.dataframe(
+                    grouped_data,
+                    width="stretch",
+                    hide_index=True
+                )
+
+            # Visualization
+
+            st.markdown("### Analytical Visualization")
 
             fig = px.bar(
                 grouped_data,
                 x="Category",
                 y="Value",
                 title=f"{aggregation} of {metric_column} by {category_column}",
-                text_auto=".2s"
+                text_auto=".2s",
+                color="Category",
+                color_discrete_sequence=px.colors.qualitative.Bold
             )
 
-            st.plotly_chart(fig, width="stretch")
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                showlegend=False,
+                title_x=0.02
+            )
+
+            with st.container(border=True):
+                st.plotly_chart(fig, width="stretch")
+
+            # Key Insight
 
             if not grouped_data.empty:
 
                 top_category = grouped_data.iloc[0]["Category"]
                 top_value = grouped_data.iloc[0]["Value"]
 
+                result_label = (
+                    "Lowest" if aggregation == "Minimum" else "Highest"
+                )
+
                 st.success(
-                    f"Highest {aggregation.lower()}: "
+                    f"{result_label} {aggregation.lower()}: "
                     f"{top_category} ({top_value:,.2f})"
                 )
 
@@ -493,18 +1022,44 @@ if uploaded_file is not None:
         )
 
 
-    # ==========================================
+       # ==========================================
     # 13. AUTOMATED ANALYTICS REPORT
     # ==========================================
 
-    st.header("12. Download Analytics Report")
+    st.header("12. Automated Analytics Report")
+
+    st.markdown(
+        "Generate and export a structured report containing dataset statistics and data quality information."
+    )
+
+    # Report Summary
+
+    st.subheader("Report Overview")
+
+    report_col1, report_col2, report_col3 = st.columns(3)
+
+    with report_col1:
+        st.metric("Total Records", f"{len(df):,}")
+
+    with report_col2:
+        st.metric("Total Features", f"{df.shape[1]:,}")
+
+    with report_col3:
+        st.metric(
+            "Data Quality",
+            f"{((df.notna().sum().sum() / df.size) * 100):.2f}%"
+            if df.size > 0 else "100%"
+        )
+
+    # Generate Report
 
     report = StringIO()
 
     report.write("DATASPHERE ANALYTICS REPORT\n")
-    report.write("=" * 40 + "\n\n")
+    report.write("=" * 50 + "\n\n")
 
     report.write("DATASET OVERVIEW\n")
+    report.write("-" * 30 + "\n")
     report.write(f"Total Rows: {df.shape[0]}\n")
     report.write(f"Total Columns: {df.shape[1]}\n")
     report.write(
@@ -514,83 +1069,227 @@ if uploaded_file is not None:
         f"Duplicate Rows: {int(df.duplicated().sum())}\n\n"
     )
 
+    report.write("COLUMN INFORMATION\n")
+    report.write("-" * 30 + "\n")
+    report.write(df.dtypes.astype(str).to_string())
+    report.write("\n\n")
+
     report.write("STATISTICAL SUMMARY\n")
-    report.write(
-        df.describe(include="all").to_string()
-    )
+    report.write("-" * 30 + "\n")
+    report.write(df.describe(include="all").to_string())
 
     report.write("\n\nMISSING VALUE ANALYSIS\n")
+    report.write("-" * 30 + "\n")
     report.write(df.isna().sum().to_string())
 
-    st.download_button(
-        label="Download Analytics Report",
-        data=report.getvalue(),
-        file_name="datasphere_report.txt",
-        mime="text/plain"
-    )
-    # ==========================================
+    report.write("\n\nDUPLICATE ANALYSIS\n")
+    report.write("-" * 30 + "\n")
+    report.write(f"Duplicate Rows: {int(df.duplicated().sum())}\n")
+
+    report.write("\n\nEND OF REPORT\n")
+    report.write("=" * 50)
+
+    report_content = report.getvalue()
+
+    # Report Preview
+
+    st.subheader("Report Preview")
+
+    with st.expander("View Generated Analytics Report"):
+
+        st.code(
+            report_content,
+            language="text"
+        )
+
+    # Report Download
+
+    st.divider()
+
+    st.subheader("Export Report")
+
+    with st.container(border=True):
+
+        st.write("Your analytics report is ready.")
+
+        st.download_button(
+            label="Download Analytics Report",
+            data=report_content,
+            file_name="datasphere_report.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+
+        st.caption(
+            "Format: TXT | Includes dataset overview, column information, statistics, and data quality analysis."
+        )
+        # ==========================================
     # 14. ADVANCED DATA CLEANING
     # ==========================================
 
     st.header("13. Advanced Data Cleaning")
 
-    st.subheader("Missing Value Handling")
+    st.markdown(
+        "Identify missing data, apply cleaning strategies, and export your cleaned dataset."
+    )
 
-    # Display missing values
+    # Missing Value Analysis
+
+    st.subheader("Missing Value Assessment")
+
     missing_values = df.isnull().sum()
 
     missing_df = pd.DataFrame({
         "Column": missing_values.index,
-        "Missing Values": missing_values.values
+        "Missing Values": missing_values.values,
+        "Missing Percentage": (
+            (missing_values.values / len(df)) * 100
+        ).round(2) if len(df) > 0 else 0
     })
 
-    st.dataframe(missing_df, width="stretch")
+    total_missing = int(missing_values.sum())
+    affected_columns = int((missing_values > 0).sum())
 
-    # Create a copy for cleaning
-    cleaned_df = df.copy()
+    completeness = (
+        ((df.size - total_missing) / df.size) * 100
+        if df.size > 0 else 100
+    )
 
-    if missing_values.sum() > 0:
+    clean_col1, clean_col2, clean_col3 = st.columns(3)
+
+    with clean_col1:
+        st.metric("Missing Values", f"{total_missing:,}")
+
+    with clean_col2:
+        st.metric("Affected Columns", affected_columns)
+
+    with clean_col3:
+        st.metric("Data Completeness", f"{completeness:.2f}%")
+
+    st.markdown("### Missing Value Details")
+
+    with st.container(border=True):
+        st.dataframe(
+            missing_df,
+            width="stretch",
+            hide_index=True
+        )
+
+    # Cleaning Operations
+
+    st.divider()
+
+    st.subheader("Cleaning Configuration")
+
+    if total_missing > 0:
 
         cleaning_method = st.selectbox(
-            "Select Cleaning Method",
+            "Select Cleaning Strategy",
             [
                 "Remove Rows with Missing Values",
                 "Fill Numerical Values with Mean",
                 "Fill Numerical Values with Median",
                 "Fill Categorical Values with Mode"
-            ]
+            ],
+            key="advanced_cleaning_method"
         )
 
-        if st.button("Apply Cleaning"):
+        st.info(
+            f"Selected Strategy: {cleaning_method}"
+        )
+
+        if st.button(
+            "Apply Cleaning",
+            use_container_width=True,
+            key="apply_advanced_cleaning"
+        ):
+
+            cleaned_df = df.copy()
 
             if cleaning_method == "Remove Rows with Missing Values":
+
                 cleaned_df = cleaned_df.dropna()
 
             elif cleaning_method == "Fill Numerical Values with Mean":
-                for column in cleaned_df.select_dtypes(include="number").columns:
+
+                for column in cleaned_df.select_dtypes(
+                    include="number"
+                ).columns:
+
                     cleaned_df[column] = cleaned_df[column].fillna(
                         cleaned_df[column].mean()
                     )
 
             elif cleaning_method == "Fill Numerical Values with Median":
-                for column in cleaned_df.select_dtypes(include="number").columns:
+
+                for column in cleaned_df.select_dtypes(
+                    include="number"
+                ).columns:
+
                     cleaned_df[column] = cleaned_df[column].fillna(
                         cleaned_df[column].median()
                     )
 
             elif cleaning_method == "Fill Categorical Values with Mode":
+
                 for column in cleaned_df.select_dtypes(
-                    include=["object", "category", "str"]
+                    include=["object", "category", "string"]
                 ).columns:
+
                     if not cleaned_df[column].mode().empty:
+
                         cleaned_df[column] = cleaned_df[column].fillna(
                             cleaned_df[column].mode()[0]
                         )
 
-            st.success("Data cleaning completed!")
+            # Cleaning Results
 
-            st.subheader("Cleaned Dataset")
-            st.dataframe(cleaned_df, width="stretch")
+            remaining_missing = int(
+                cleaned_df.isnull().sum().sum()
+            )
+
+            removed_rows = len(df) - len(cleaned_df)
+
+            st.success("Cleaning operation completed!")
+
+            result_col1, result_col2, result_col3 = st.columns(3)
+
+            with result_col1:
+                st.metric(
+                    "Original Rows",
+                    f"{len(df):,}"
+                )
+
+            with result_col2:
+                st.metric(
+                    "Remaining Rows",
+                    f"{len(cleaned_df):,}"
+                )
+
+            with result_col3:
+                st.metric(
+                    "Remaining Missing Values",
+                    f"{remaining_missing:,}"
+                )
+
+            st.caption(
+                f"Rows removed: {removed_rows:,}"
+            )
+
+            st.subheader("Cleaned Dataset Preview")
+
+            with st.container(border=True):
+                st.dataframe(
+                    cleaned_df,
+                    width="stretch",
+                    hide_index=True
+                )
+
+            # Download Cleaned Dataset
+
+            st.divider()
+
+            st.subheader("Export Cleaned Dataset")
 
             csv_data = cleaned_df.to_csv(
                 index=False
@@ -600,37 +1299,106 @@ if uploaded_file is not None:
                 label="Download Cleaned CSV",
                 data=csv_data,
                 file_name="cleaned_dataset.csv",
-                mime="text/csv"
+                mime="text/csv",
+                use_container_width=True
             )
 
     else:
-        st.success("No missing values found in this dataset!") 
-        # ==========================================
+
+        st.success(
+            "Excellent! No missing values found. Your dataset is complete."
+        )
+           # ==========================================
     # 15. DUPLICATE DATA CLEANING
     # ==========================================
 
     st.subheader("Duplicate Data Handling")
 
-    duplicate_count = int(df.duplicated().sum())
+    st.markdown(
+        "Detect repeated records and remove unnecessary duplicate entries."
+    )
 
-    st.metric("Duplicate Rows Found", duplicate_count)
+    duplicate_count = int(df.duplicated().sum())
+    total_rows = len(df)
+
+    unique_rows = total_rows - duplicate_count
+
+    duplicate_percentage = (
+        (duplicate_count / total_rows) * 100
+        if total_rows > 0 else 0
+    )
+
+    # Duplicate Statistics
+
+    dup_col1, dup_col2, dup_col3 = st.columns(3)
+
+    with dup_col1:
+        st.metric("Duplicate Rows", f"{duplicate_count:,}")
+
+    with dup_col2:
+        st.metric("Unique Rows", f"{unique_rows:,}")
+
+    with dup_col3:
+        st.metric("Duplicate Percentage", f"{duplicate_percentage:.2f}%")
+
+    st.divider()
+
+    # Duplicate Removal
+
+    st.subheader("Duplicate Removal")
 
     if duplicate_count > 0:
 
-        if st.button("Remove Duplicate Rows"):
+        st.warning(
+            f"{duplicate_count:,} duplicate rows were detected."
+        )
 
-            duplicate_cleaned_df = df.drop_duplicates()
+        if st.button(
+            "Remove Duplicate Rows",
+            use_container_width=True,
+            key="remove_duplicate_rows"
+        ):
+
+            duplicate_cleaned_df = df.drop_duplicates().copy()
+
+            removed_count = len(df) - len(duplicate_cleaned_df)
 
             st.success(
-                f"Successfully removed {duplicate_count} duplicate rows!"
+                f"Successfully removed {removed_count:,} duplicate rows!"
             )
+
+            # Cleaning Results
+
+            result_col1, result_col2, result_col3 = st.columns(3)
+
+            with result_col1:
+                st.metric("Original Rows", f"{len(df):,}")
+
+            with result_col2:
+                st.metric("Cleaned Rows", f"{len(duplicate_cleaned_df):,}")
+
+            with result_col3:
+                st.metric(
+                    "Remaining Duplicates",
+                    f"{int(duplicate_cleaned_df.duplicated().sum()):,}"
+                )
+
+            # Cleaned Dataset
 
             st.subheader("Dataset After Duplicate Removal")
 
-            st.dataframe(
-                duplicate_cleaned_df,
-                width="stretch"
-            )
+            with st.container(border=True):
+                st.dataframe(
+                    duplicate_cleaned_df,
+                    width="stretch",
+                    hide_index=True
+                )
+
+            # Export
+
+            st.divider()
+
+            st.subheader("Export Cleaned Dataset")
 
             duplicate_csv = duplicate_cleaned_df.to_csv(
                 index=False
@@ -640,71 +1408,99 @@ if uploaded_file is not None:
                 label="Download Duplicate-Free CSV",
                 data=duplicate_csv,
                 file_name="duplicate_free_dataset.csv",
-                mime="text/csv"
+                mime="text/csv",
+                use_container_width=True
             )
 
     else:
 
-        st.success("No duplicate rows found in this dataset!")  
-        # ==========================================
+        st.success(
+            "Excellent! No duplicate rows found. Your dataset is unique."
+        ) 
+           # ==========================================
     # 16. DATA TYPE CORRECTION
     # ==========================================
 
     st.header("14. Data Type Correction")
 
-    st.write("Inspect and convert column data types.")
+    st.markdown(
+        "Inspect column data types, convert values, and validate the results."
+    )
 
-    # Display current data types
+    # Current Data Type Overview
+
+    st.subheader("Current Data Type Overview")
 
     dtype_info = pd.DataFrame({
         "Column": df.columns,
-        "Current Data Type": df.dtypes.astype(str).values
+        "Current Data Type": df.dtypes.astype(str).values,
+        "Non-Missing Values": df.notna().sum().values
     })
 
-    st.dataframe(
-        dtype_info,
-        width="stretch"
+    with st.container(border=True):
+        st.dataframe(
+            dtype_info,
+            width="stretch",
+            hide_index=True
+        )
+
+    # Conversion Configuration
+
+    st.divider()
+
+    st.subheader("Conversion Configuration")
+
+    convert_col1, convert_col2 = st.columns(2)
+
+    with convert_col1:
+        selected_column = st.selectbox(
+            "Select a column",
+            df.columns,
+            key="dtype_column"
+        )
+
+    with convert_col2:
+        target_dtype = st.selectbox(
+            "Select the new data type",
+            ["Integer", "Decimal", "Text", "Date"],
+            key="target_dtype"
+        )
+
+    st.info(
+        f"Converting **{selected_column}** "
+        f"from **{df[selected_column].dtype}** "
+        f"to **{target_dtype}**."
     )
 
-    # Select column and target data type
+    # Execute Conversion
 
-    st.markdown("### Convert Column Data Type")
-
-    selected_column = st.selectbox(
-        "Select a column",
-        df.columns,
-        key="dtype_column"
-    )
-
-    target_dtype = st.selectbox(
-        "Select the new data type",
-        ["Integer", "Decimal", "Text", "Date"],
-        key="target_dtype"
-    )
-
-    # Convert selected column
-
-    if st.button("Convert Data Type"):
+    if st.button(
+        "Convert Data Type",
+        use_container_width=True,
+        key="convert_data_type"
+    ):
 
         converted_df = df.copy()
+
+        original_missing = int(
+            converted_df[selected_column].isna().sum()
+        )
 
         try:
 
             if target_dtype == "Integer":
 
-                converted_df[selected_column] = (
-                    pd.to_numeric(
-                        converted_df[selected_column],
-                        errors="coerce"
-                    ).astype("Int64")
-                )
+                converted_df[selected_column] = pd.to_numeric(
+                    converted_df[selected_column],
+                    errors="coerce"
+                ).astype("Int64")
 
             elif target_dtype == "Decimal":
 
-               converted_df[selected_column] = pd.to_numeric(
-                converted_df[selected_column],
-                errors="coerce"
-               ).astype("float64")
+                converted_df[selected_column] = pd.to_numeric(
+                    converted_df[selected_column],
+                    errors="coerce"
+                ).astype("float64")
 
             elif target_dtype == "Text":
 
@@ -719,20 +1515,75 @@ if uploaded_file is not None:
                     errors="coerce"
                 )
 
-            # Display conversion result
+            # Conversion Validation
 
-            st.success("Data type converted successfully!")
-
-            st.subheader("Converted Dataset")
-
-            st.dataframe(
-                converted_df,
-                width="stretch"
+            converted_missing = int(
+                converted_df[selected_column].isna().sum()
             )
 
+            newly_missing = max(
+                0,
+                converted_missing - original_missing
+            )
+
+            converted_values = (
+                len(df) - converted_missing
+            )
+
+            # Conversion Results
+
+            st.success("Data type conversion completed!")
+
+            result_col1, result_col2, result_col3 = st.columns(3)
+
+            with result_col1:
+                st.metric(
+                    "Converted Data Type",
+                    str(converted_df[selected_column].dtype)
+                )
+
+            with result_col2:
+                st.metric(
+                    "Valid Values",
+                    f"{converted_values:,}"
+                )
+
+            with result_col3:
+                st.metric(
+                    "New Missing Values",
+                    f"{newly_missing:,}"
+                )
+
+            if newly_missing > 0:
+                st.warning(
+                    f"{newly_missing:,} values could not be converted "
+                    "and became missing values (NaN/NaT)."
+                )
+            else:
+                st.success(
+                    "No additional missing values were created."
+                )
+
+            # Converted Dataset
+
+            st.subheader("Converted Dataset Preview")
+
+            with st.container(border=True):
+                st.dataframe(
+                    converted_df,
+                    width="stretch",
+                    hide_index=True
+                )
+
+            # Conversion Details
+
+            st.markdown("### Conversion Details")
+
+            st.write("Selected Column:", selected_column)
+
             st.write(
-                "Selected Column:",
-                selected_column
+                "Original Data Type:",
+                str(df[selected_column].dtype)
             )
 
             st.write(
@@ -740,7 +1591,11 @@ if uploaded_file is not None:
                 str(converted_df[selected_column].dtype)
             )
 
-            # Download converted dataset
+            # Export Converted Dataset
+
+            st.divider()
+
+            st.subheader("Export Converted Dataset")
 
             converted_csv = converted_df.to_csv(
                 index=False
@@ -750,7 +1605,8 @@ if uploaded_file is not None:
                 label="Download Converted CSV",
                 data=converted_csv,
                 file_name="converted_dataset.csv",
-                mime="text/csv"
+                mime="text/csv",
+                use_container_width=True
             )
 
         except Exception as error:
@@ -758,20 +1614,21 @@ if uploaded_file is not None:
             st.error(
                 f"Conversion failed: {error}"
             )
-            # ==========================================
+               # ==========================================
     # 17. OUTLIER DETECTION
     # ==========================================
 
     st.header("15. Outlier Detection")
 
-    st.write(
-        "Identify unusual values in numerical columns "
-        "using the IQR method."
+    st.markdown(
+        "Identify unusual numerical values using the Interquartile Range (IQR) method."
     )
 
     if numeric_columns:
 
         outlier_results = []
+
+        total_outliers = 0
 
         for column in numeric_columns:
 
@@ -790,30 +1647,77 @@ if uploaded_file is not None:
                 ).sum()
             )
 
+            outlier_percentage = (
+                (outlier_count / len(df)) * 100
+                if len(df) > 0 else 0
+            )
+
+            total_outliers += outlier_count
+
             outlier_results.append({
                 "Column": column,
-                "Lower Limit": lower_limit,
-                "Upper Limit": upper_limit,
-                "Outliers Found": outlier_count
+                "Q1": round(Q1, 2),
+                "Q3": round(Q3, 2),
+                "IQR": round(IQR, 2),
+                "Lower Limit": round(lower_limit, 2),
+                "Upper Limit": round(upper_limit, 2),
+                "Outliers Found": outlier_count,
+                "Outlier Percentage": round(outlier_percentage, 2)
             })
 
         outlier_df = pd.DataFrame(outlier_results)
 
-        # Outlier Summary
+        # Outlier Overview
 
-        st.subheader("Outlier Analysis Summary")
+        st.subheader("Outlier Analysis Overview")
 
-        st.dataframe(
-            outlier_df,
-            width="stretch"
+        affected_columns = int(
+            (outlier_df["Outliers Found"] > 0).sum()
         )
 
+        total_numeric_columns = len(numeric_columns)
+
+        overview_col1, overview_col2, overview_col3 = st.columns(3)
+
+        with overview_col1:
+            st.metric(
+                "Numerical Columns",
+                total_numeric_columns
+            )
+
+        with overview_col2:
+            st.metric(
+                "Columns with Outliers",
+                affected_columns
+            )
+
+        with overview_col3:
+            st.metric(
+                "Total Outlier Instances",
+                f"{total_outliers:,}"
+            )
+
+        st.divider()
+
+        # Outlier Analysis Table
+
+        st.subheader("Detailed Outlier Analysis")
+
+        with st.container(border=True):
+            st.dataframe(
+                outlier_df,
+                width="stretch",
+                hide_index=True
+            )
+
         # Outlier Visualization
+
+        st.divider()
 
         st.subheader("Outlier Visualization")
 
         selected_outlier_column = st.selectbox(
-            "Select column for outlier visualization",
+            "Select numerical column",
             numeric_columns,
             key="outlier_visualization"
         )
@@ -822,58 +1726,136 @@ if uploaded_file is not None:
             df,
             y=selected_outlier_column,
             title=f"Outlier Distribution: {selected_outlier_column}",
-            points="outliers"
+            points="outliers",
+            color_discrete_sequence=["#22D3EE"]
         )
 
-        st.plotly_chart(
-            fig,
-            width="stretch"
-        )
-                # Outlier Removal
-
-        st.subheader("Outlier Removal")
-
-        st.write(
-            "Remove rows containing outliers from the selected column."
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02,
+            yaxis_title=selected_outlier_column
         )
 
-        if st.button("Remove Outliers"):
-
-            Q1 = df[selected_outlier_column].quantile(0.25)
-            Q3 = df[selected_outlier_column].quantile(0.75)
-
-            IQR = Q3 - Q1
-
-            lower_limit = Q1 - (1.5 * IQR)
-            upper_limit = Q3 + (1.5 * IQR)
-
-            outlier_cleaned_df = df[
-                (df[selected_outlier_column] >= lower_limit) &
-                (df[selected_outlier_column] <= upper_limit)
-            ].copy()
-
-            removed_count = len(df) - len(outlier_cleaned_df)
-
-            st.success(
-                f"Successfully removed {removed_count} outlier rows!"
-            )
-
-            st.subheader("Dataset After Outlier Removal")
-
-            st.dataframe(
-                outlier_cleaned_df,
+        with st.container(border=True):
+            st.plotly_chart(
+                fig,
                 width="stretch"
             )
 
-            outlier_csv = outlier_cleaned_df.to_csv(
-                index=False
-            ).encode("utf-8")
+        # Outlier Removal
 
-            st.download_button(
-                label="Download Outlier-Free CSV",
-                data=outlier_csv,
-                file_name="outlier_free_dataset.csv",
-                mime="text/csv"
+        st.divider()
+
+        st.subheader("Outlier Removal")
+
+        st.markdown(
+            "Remove rows containing outliers from the selected numerical column."
+        )
+
+        selected_stats = outlier_df[
+            outlier_df["Column"] == selected_outlier_column
+        ].iloc[0]
+
+        selected_outlier_count = int(
+            selected_stats["Outliers Found"]
+        )
+
+        if selected_outlier_count > 0:
+
+            st.warning(
+                f"{selected_outlier_count:,} outlier rows detected "
+                f"in {selected_outlier_column}."
+            )
+
+            if st.button(
+                "Remove Outliers",
+                use_container_width=True,
+                key="remove_outliers"
+            ):
+
+                Q1 = df[selected_outlier_column].quantile(0.25)
+                Q3 = df[selected_outlier_column].quantile(0.75)
+
+                IQR = Q3 - Q1
+
+                lower_limit = Q1 - (1.5 * IQR)
+                upper_limit = Q3 + (1.5 * IQR)
+
+                outlier_cleaned_df = df[
+                    (df[selected_outlier_column] >= lower_limit) &
+                    (df[selected_outlier_column] <= upper_limit)
+                ].copy()
+
+                removed_count = len(df) - len(outlier_cleaned_df)
+
+                remaining_outliers = int(
+                    (
+                        (outlier_cleaned_df[selected_outlier_column] < lower_limit) |
+                        (outlier_cleaned_df[selected_outlier_column] > upper_limit)
+                    ).sum()
+                )
+
+                st.success(
+                    f"Successfully removed {removed_count:,} outlier rows!"
+                )
+
+                # Cleaning Results
+
+                result_col1, result_col2, result_col3 = st.columns(3)
+
+                with result_col1:
+                    st.metric(
+                        "Original Rows",
+                        f"{len(df):,}"
+                    )
+
+                with result_col2:
+                    st.metric(
+                        "Cleaned Rows",
+                        f"{len(outlier_cleaned_df):,}"
+                    )
+
+                with result_col3:
+                    st.metric(
+                        "Remaining Outliers",
+                        remaining_outliers
+                    )
+
+                # Cleaned Dataset
+
+                st.subheader("Dataset After Outlier Removal")
+
+                with st.container(border=True):
+                    st.dataframe(
+                        outlier_cleaned_df,
+                        width="stretch",
+                        hide_index=True
+                    )
+
+                # Export
+
+                st.divider()
+
+                st.subheader("Export Cleaned Dataset")
+
+                outlier_csv = outlier_cleaned_df.to_csv(
+                    index=False
+                ).encode("utf-8")
+
+                st.download_button(
+                    label="Download Outlier-Free CSV",
+                    data=outlier_csv,
+                    file_name="outlier_free_dataset.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
+        else:
+
+            st.success(
+                f"No outliers detected in {selected_outlier_column}."
             )
 
     else:
@@ -881,16 +1863,34 @@ if uploaded_file is not None:
         st.warning(
             "No numerical columns available for outlier detection."
         )
-        # ==========================================
+            # ==========================================
     # 18. INTERACTIVE DATA VISUALIZATION DASHBOARD
     # ==========================================
 
     st.header("16. Interactive Data Visualization Dashboard")
 
-    st.write(
-        "Create customized interactive visualizations "
-        "from your uploaded dataset."
+    st.markdown(
+        "Build customized, interactive charts and explore your dataset visually."
     )
+
+    # Visualization Overview
+
+    viz_col1, viz_col2, viz_col3 = st.columns(3)
+
+    with viz_col1:
+        st.metric("Available Columns", len(df.columns))
+
+    with viz_col2:
+        st.metric("Numerical Columns", len(numeric_columns))
+
+    with viz_col3:
+        st.metric("Categorical Columns", len(categorical_columns))
+
+    st.divider()
+
+    # Chart Selection
+
+    st.subheader("Visualization Builder")
 
     chart_type = st.selectbox(
         "Select Visualization Type",
@@ -902,141 +1902,222 @@ if uploaded_file is not None:
             "Scatter Plot"
         ],
         key="dashboard_chart_type"
-    )    
+    )
 
-        # Select columns for visualization
+    st.divider()
+
+    # Chart Configuration
 
     st.subheader("Chart Configuration")
 
+    fig = None
+
     if chart_type in ["Bar Chart", "Line Chart"]:
 
-        x_column = st.selectbox(
-            "Select X-axis column",
-            df.columns,
-            key="dashboard_x"
-        )
+        if not numeric_columns:
 
-        y_column = st.selectbox(
-            "Select Y-axis column",
-            numeric_columns,
-            key="dashboard_y"
-        )
+            st.warning(
+                "This chart requires at least one numerical column."
+            )
+
+        else:
+
+            config_col1, config_col2 = st.columns(2)
+
+            with config_col1:
+                x_column = st.selectbox(
+                    "Select X-axis column",
+                    df.columns,
+                    key="dashboard_x"
+                )
+
+            with config_col2:
+                y_column = st.selectbox(
+                    "Select Y-axis column",
+                    numeric_columns,
+                    key="dashboard_y"
+                )
+
+            if chart_type == "Bar Chart":
+
+                fig = px.bar(
+                    df,
+                    x=x_column,
+                    y=y_column,
+                    color=x_column,
+                    title=f"{y_column} by {x_column}",
+                    color_discrete_sequence=px.colors.qualitative.Bold
+                )
+
+                fig.update_layout(
+                    showlegend=False
+                )
+
+            else:
+
+                fig = px.line(
+                    df,
+                    x=x_column,
+                    y=y_column,
+                    title=f"{y_column} Trend by {x_column}",
+                    markers=True
+                )
 
     elif chart_type == "Pie Chart":
 
-        pie_column = st.selectbox(
-            "Select category column",
-            categorical_columns,
-            key="dashboard_pie"
-        )
+        if not categorical_columns:
+
+            st.warning(
+                "Pie charts require at least one categorical column."
+            )
+
+        else:
+
+            pie_column = st.selectbox(
+                "Select category column",
+                categorical_columns,
+                key="dashboard_pie"
+            )
+
+            pie_data = (
+                df[pie_column]
+                .value_counts()
+                .reset_index()
+            )
+
+            pie_data.columns = ["Category", "Count"]
+
+            fig = px.pie(
+                pie_data,
+                names="Category",
+                values="Count",
+                title=f"Distribution of {pie_column}",
+                hole=0.4,
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
 
     elif chart_type == "Histogram":
 
-        histogram_column = st.selectbox(
-            "Select numerical column",
-            numeric_columns,
-            key="dashboard_histogram"
-        )
+        if not numeric_columns:
+
+            st.warning(
+                "Histograms require at least one numerical column."
+            )
+
+        else:
+
+            histogram_column = st.selectbox(
+                "Select numerical column",
+                numeric_columns,
+                key="dashboard_histogram"
+            )
+
+            fig = px.histogram(
+                df,
+                x=histogram_column,
+                title=f"Distribution of {histogram_column}",
+                color_discrete_sequence=["#22D3EE"]
+            )
 
     elif chart_type == "Scatter Plot":
 
-        scatter_x = st.selectbox(
-            "Select X-axis",
-            numeric_columns,
-            key="dashboard_scatter_x"
-        )
+        if len(numeric_columns) < 2:
 
-        scatter_y = st.selectbox(
-            "Select Y-axis",
-            numeric_columns,
-            index=min(1, len(numeric_columns) - 1),
-            key="dashboard_scatter_y"
-        )
+            st.warning(
+                "Scatter plots require at least two numerical columns."
+            )
 
-        # Generate Selected Chart
+        else:
 
-    st.subheader("Visualization Result")
+            scatter_col1, scatter_col2 = st.columns(2)
 
-    custom_title = st.text_input(
-        "Enter Custom Chart Title",
-        value="My DataSphere Visualization",
-        key="custom_chart_title"
-    )
+            with scatter_col1:
+                scatter_x = st.selectbox(
+                    "Select X-axis",
+                    numeric_columns,
+                    key="dashboard_scatter_x"
+                )
 
-    if chart_type == "Bar Chart":
+            with scatter_col2:
+                scatter_y = st.selectbox(
+                    "Select Y-axis",
+                    numeric_columns,
+                    index=1,
+                    key="dashboard_scatter_y"
+                )
 
-        fig = px.bar(
-            df,
-            x=x_column,
-            y=y_column,
-            color=x_column,
-            title=f"{y_column} by {x_column}",
-            color_discrete_sequence=px.colors.qualitative.Bold
+            fig = px.scatter(
+                df,
+                x=scatter_x,
+                y=scatter_y,
+                title=f"{scatter_y} vs {scatter_x}",
+                color_discrete_sequence=["#A78BFA"]
+            )
+
+    # Chart Customization and Display
+
+    if fig is not None:
+
+        st.divider()
+
+        st.subheader("Chart Customization")
+
+        custom_title = st.text_input(
+            "Enter Chart Title",
+            value="My DataSphere Visualization",
+            key="custom_chart_title"
         )
 
         fig.update_layout(
-            showlegend=False
+            title=custom_title,
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_x=0.02,
+            font=dict(
+                family="Arial",
+                size=13
+            ),
+            margin=dict(
+                l=30,
+                r=30,
+                t=70,
+                b=30
+            )
         )
 
-    elif chart_type == "Line Chart":
+        # Visualization Result
 
-        fig = px.line(
-            df,
-            x=x_column,
-            y=y_column,
-            title=f"{y_column} Trend by {x_column}",
-            markers=True
+        st.subheader("Visualization Result")
+
+        with st.container(border=True):
+            st.plotly_chart(
+                fig,
+                width="stretch"
+            )
+
+        # Export Visualization
+
+        st.divider()
+
+        st.subheader("Export Visualization")
+
+        html_chart = fig.to_html(
+            full_html=True,
+            include_plotlyjs=True
         )
 
-    elif chart_type == "Pie Chart":
-
-        pie_data = df[pie_column].value_counts().reset_index()
-        pie_data.columns = ["Category", "Count"]
-
-        fig = px.pie(
-            pie_data,
-            names="Category",
-            values="Count",
-            title=f"Distribution of {pie_column}"
+        st.download_button(
+            label="Download Interactive Chart (HTML)",
+            data=html_chart,
+            file_name="datasphere_chart.html",
+            mime="text/html",
+            use_container_width=True
         )
 
-    elif chart_type == "Histogram":
-
-        fig = px.histogram(
-            df,
-            x=histogram_column,
-            title=f"Distribution of {histogram_column}"
+        st.caption(
+            "Export your interactive Plotly chart and open it in a web browser."
         )
-
-    elif chart_type == "Scatter Plot":
-
-        fig = px.scatter(
-            df,
-            x=scatter_x,
-            y=scatter_y,
-            title=f"{scatter_y} vs {scatter_x}"
-        )
-
-    fig.update_layout(
-        title=custom_title
-    )
-
-    st.plotly_chart(fig, width="stretch")
-        # Download Interactive Chart
-
-    st.subheader("Export Visualization")
-
-    html_chart = fig.to_html(
-        full_html=True,
-        include_plotlyjs=True
-    )
-
-    st.download_button(
-        label="Download Interactive Chart (HTML)",
-        data=html_chart,
-        file_name="datasphere_chart.html",
-        mime="text/html"
-    )
 else:
 
     st.info(
