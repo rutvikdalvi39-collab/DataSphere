@@ -528,22 +528,86 @@ if uploaded_file is not None:
         file_name="datasphere_report.txt",
         mime="text/plain"
     )
+    # ==========================================
+    # 14. ADVANCED DATA CLEANING
+    # ==========================================
+
+    st.header("13. Advanced Data Cleaning")
+
+    st.subheader("Missing Value Handling")
+
+    # Display missing values
+    missing_values = df.isnull().sum()
+
+    missing_df = pd.DataFrame({
+        "Column": missing_values.index,
+        "Missing Values": missing_values.values
+    })
+
+    st.dataframe(missing_df, width="stretch")
+
+    # Create a copy for cleaning
+    cleaned_df = df.copy()
+
+    if missing_values.sum() > 0:
+
+        cleaning_method = st.selectbox(
+            "Select Cleaning Method",
+            [
+                "Remove Rows with Missing Values",
+                "Fill Numerical Values with Mean",
+                "Fill Numerical Values with Median",
+                "Fill Categorical Values with Mode"
+            ]
+        )
+
+        if st.button("Apply Cleaning"):
+
+            if cleaning_method == "Remove Rows with Missing Values":
+                cleaned_df = cleaned_df.dropna()
+
+            elif cleaning_method == "Fill Numerical Values with Mean":
+                for column in cleaned_df.select_dtypes(include="number").columns:
+                    cleaned_df[column] = cleaned_df[column].fillna(
+                        cleaned_df[column].mean()
+                    )
+
+            elif cleaning_method == "Fill Numerical Values with Median":
+                for column in cleaned_df.select_dtypes(include="number").columns:
+                    cleaned_df[column] = cleaned_df[column].fillna(
+                        cleaned_df[column].median()
+                    )
+
+            elif cleaning_method == "Fill Categorical Values with Mode":
+                for column in cleaned_df.select_dtypes(
+                    include=["object", "category", "str"]
+                ).columns:
+                    if not cleaned_df[column].mode().empty:
+                        cleaned_df[column] = cleaned_df[column].fillna(
+                            cleaned_df[column].mode()[0]
+                        )
+
+            st.success("Data cleaning completed!")
+
+            st.subheader("Cleaned Dataset")
+            st.dataframe(cleaned_df, width="stretch")
+
+            csv_data = cleaned_df.to_csv(
+                index=False
+            ).encode("utf-8")
+
+            st.download_button(
+                label="Download Cleaned CSV",
+                data=csv_data,
+                file_name="cleaned_dataset.csv",
+                mime="text/csv"
+            )
+
+    else:
+        st.success("No missing values found in this dataset!")    
 
 else:
 
     st.info(
         "Upload a CSV dataset to start exploring DataSphere."
     )
-
-
-# ==========================================
-# 14. FOOTER
-# ==========================================
-
-st.divider()
-
-st.caption(
-    "DataSphere | Multi-Domain Data Analytics Platform"
-)
-
-st.caption("Built with Python, Pandas, NumPy, Plotly and Streamlit.")
