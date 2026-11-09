@@ -5,6 +5,8 @@ import numpy as np
 import plotly.express as px
 from io import StringIO
 
+from modules.data_explorer import render_data_explorer
+
 # ==========================================
 # 1. PAGE CONFIGURATION
 # ==========================================
@@ -51,29 +53,9 @@ st.sidebar.caption("Explore · Analyze · Visualize")
 # 2. DATASET UPLOAD
 # ==========================================
 
-st.header("1. Dataset Explorer")
+df = render_data_explorer()
 
-uploaded_file = st.file_uploader(
-    "Upload your CSV dataset",
-    type=["csv"]
-)
-
-if uploaded_file is not None:
-
-    # Safe CSV File Loading
-    try:
-        df = pd.read_csv(uploaded_file)
-
-        if df.empty:
-            st.error("The uploaded CSV file is empty.")
-            st.stop()
-
-        st.success("Dataset uploaded successfully!")
-
-    except Exception as error:
-        st.error(f"Unable to read the CSV file: {error}")
-        st.stop()
-
+if df is not None:
 
         # ==========================================
     # 3. DATASET PREVIEW
