@@ -969,7 +969,13 @@ if uploaded_file is not None:
             df,
             x=x_column,
             y=y_column,
-            title=f"{y_column} by {x_column}"
+            color=x_column,
+            title=f"{y_column} by {x_column}",
+            color_discrete_sequence=px.colors.qualitative.Bold
+        )
+
+        fig.update_layout(
+            showlegend=False
         )
 
     elif chart_type == "Line Chart":
@@ -1016,6 +1022,21 @@ if uploaded_file is not None:
     )
 
     st.plotly_chart(fig, width="stretch")
+        # Download Interactive Chart
+
+    st.subheader("Export Visualization")
+
+    html_chart = fig.to_html(
+        full_html=True,
+        include_plotlyjs=True
+    )
+
+    st.download_button(
+        label="Download Interactive Chart (HTML)",
+        data=html_chart,
+        file_name="datasphere_chart.html",
+        mime="text/html"
+    )
 else:
 
     st.info(
