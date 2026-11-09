@@ -14,112 +14,16 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+
 # ==========================================
-# DATASPHERE ADVANCED UI
+# LOAD DATASPHERE STYLES
 # ==========================================
 
-st.markdown("""
-<style>
-
-/* Main Application */
-
-.stApp {
-    background: linear-gradient(
-        135deg,
-        #0B1120 0%,
-        #111827 50%,
-        #0F172A 100%
-    );
-    color: #F8FAFC;
-}
-
-/* Main Content */
-
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    max-width: 1500px;
-}
-
-/* Sidebar */
-
-[data-testid="stSidebar"] {
-    background: #111827;
-    border-right: 1px solid #263449;
-}
-
-/* Headings */
-
-h1, h2, h3 {
-    color: #F8FAFC !important;
-    font-weight: 700 !important;
-}
-
-/* Paragraphs */
-
-p, label {
-    color: #CBD5E1;
-}
-
-/* Metric Cards */
-
-[data-testid="stMetric"] {
-    background: #172235;
-    border: 1px solid #263449;
-    padding: 20px;
-    border-radius: 14px;
-}
-
-/* Buttons */
-
-.stButton > button {
-    background: #0891B2;
-    color: white;
-    border: none;
-    border-radius: 9px;
-    padding: 0.55rem 1.2rem;
-    font-weight: 600;
-    transition: 0.2s ease;
-}
-
-.stButton > button:hover {
-    background: #06B6D4;
-    color: white;
-    border: none;
-}
-
-/* Input Fields */
-
-.stTextInput input,
-.stNumberInput input {
-    background: #172235;
-    color: white;
-    border: 1px solid #334155;
-    border-radius: 8px;
-}
-
-/* DataFrames */
-
-[data-testid="stDataFrame"] {
-    border: 1px solid #263449;
-    border-radius: 12px;
-}
-
-/* Section Dividers */
-
-hr {
-    border-color: #263449;
-}
-
-/* Remove Top Header Background */
-
-[data-testid="stHeader"] {
-    background: transparent;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
+with open("assets/style.css", "r", encoding="utf-8") as css_file:
+    st.markdown(
+        f"<style>{css_file.read()}</style>",
+        unsafe_allow_html=True
+    )
 st.sidebar.markdown("""
 <div style="padding: 15px 5px 25px 5px;">
 
